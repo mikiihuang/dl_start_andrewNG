@@ -91,9 +91,11 @@ def preprocess_data(dataset, human_vocab, machine_vocab, Tx, Ty):
     X, Y = zip(*dataset)
 
     X = np.array([string_to_int(i, Tx, human_vocab) for i in X])
+    print(X)
     Y = [string_to_int(t, Ty, machine_vocab) for t in Y]
 
     Xoh = np.array(list(map(lambda x: to_categorical(x, num_classes=len(human_vocab)), X)))
+    print(Xoh)
     Yoh = np.array(list(map(lambda x: to_categorical(x, num_classes=len(machine_vocab)), Y)))
 
     return X, np.array(Y), Xoh, Yoh
