@@ -46,13 +46,16 @@ def load_date():
         Loads some fake dates
         :returns: tuple containing human readable string, machine readable string, and date object
     """
+    #随机生成时间
     dt = fake.date_object()
 
     try:
         human_readable = format_date(dt, format=random.choice(FORMATS),
                                      locale='en_US')  # locale=random.choice(LOCALES))
         human_readable = human_readable.lower()
+
         human_readable = human_readable.replace(',', '')
+
         machine_readable = dt.isoformat()
 
     except AttributeError as e:
@@ -74,16 +77,22 @@ def load_dataset(m):
 
     for i in tqdm(range(m)):
         h, m, _ = load_date()
+        # print(h,m)
         if h is not None:
             dataset.append((h, m))
+            # print(tuple(h))
             human_vocab.update(tuple(h))
+            # print(human_vocab)
             machine_vocab.update(tuple(m))
-
+    # print(human_vocab)
+    # print("————————")
+    # print(machine_vocab)
     human = dict(zip(sorted(human_vocab) + ['<unk>', '<pad>'],
                      list(range(len(human_vocab) + 2))))
     inv_machine = dict(enumerate(sorted(machine_vocab)))
+    # print(inv_machine)
     machine = {v: k for k, v in inv_machine.items()}
-
+    # print(dataset,human,machine,inv_machine)
     return dataset, human, machine, inv_machine
 
 
@@ -91,9 +100,11 @@ def preprocess_data(dataset, human_vocab, machine_vocab, Tx, Ty):
     X, Y = zip(*dataset)
 
     X = np.array([string_to_int(i, Tx, human_vocab) for i in X])
+    # print(X)
     Y = [string_to_int(t, Ty, machine_vocab) for t in Y]
-
+    # 转换为one-hot向量
     Xoh = np.array(list(map(lambda x: to_categorical(x, num_classes=len(human_vocab)), X)))
+    # print(Xoh)
     Yoh = np.array(list(map(lambda x: to_categorical(x, num_classes=len(machine_vocab)), Y)))
 
     return X, np.array(Y), Xoh, Yoh
@@ -110,6 +121,7 @@ def string_to_int(string, length, vocab):
     vocab -- vocabulary, dictionary used to index every character of your "string"
 
     Returns:
+    返回的是语料里面每一个字母对应字典里的索引值
     rep -- list of integers (or '<unk>') (size = length) representing the position of the string's character in the vocabulary
     """
 
